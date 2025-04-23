@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Controle de Medicamentos</string>
+
+    <string name="titulo_lista_medicamentos">Lista de Medicamentos</string>
+    <string name="btn_cadastrar">Cadastrar Medicamento</string>
+    <string name="btn_excluir">Excluir Medicamento</string>
+    <string name="msg_tomado">Medicamento marcado como tomado!</string>
+    <string name="msg_nao_tomado">Medicamento marcado como não tomado!</string>
+    <string name="msg_erro_status">Erro ao atualizar status do medicamento.</string>
+    <string name="msg_erro_excluir">Erro ao excluir medicamento.</string>
+    <string name="msg_sucesso_excluir">Medicamento excluído com sucesso!</string>
+
+    <string name="hint_nome_medicamento">Nome do Medicamento</string>
+    <string name="hint_descricao_medicamento">Descrição</string>
+    <string name="hint_horario_medicamento">Horário</string>
+    <string name="btn_salvar">Salvar Medicamento</string>
+    <string name="btn_voltar">Voltar</string>
+    <string name="msg_erro_campos">Preencha todos os campos!</string>
+    <string name="msg_sucesso_salvar">Medicamento salvo com sucesso!</string>
+    <string name="msg_erro_salvar">Erro ao salvar medicamento.</string>
+</resources>

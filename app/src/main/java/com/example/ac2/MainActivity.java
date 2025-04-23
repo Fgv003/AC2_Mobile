@@ -1,0 +1,111 @@
+package com.example.ac2;
+
+import android.content.Intent;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+
+    private ListView listaMedicamentos;
+    private Button btnExcluir;
+    private BancoHelper bancoHelper;
+    private ArrayAdapter<String> adapter;
+    private List<String> medicamentos = new ArrayList<>();
+    private String medicamentoSelecionado;
+    private int posicaoSelecionada = -1;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        listaMedicamentos = findViewById(R.id.listaMedicamentos);
+        btnExcluir = findViewById(R.id.btnExcluir);
+        bancoHelper = new BancoHelper(this);
+
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, medicamentos);
+        listaMedicamentos.setAdapter(adapter);
+
+        carregarMedicamentos();
+
+        listaMedicamentos.setOnItemLongClickListener((parent, view, position, id) -> {
+            medicamentoSelecionado = medicamentos.get(position).split(" - ")[0];
+            posicaoSelecionada = position;
+
+            view.setBackgroundColor(getResources().getColor(android.R.color.darker_gray));
+
+            btnExcluir.setVisibility(View.VISIBLE);
+
+            return true;
+        });
+
+        listaMedicamentos.setOnItemClickListener((parent, view, position, id) -> {
+            if (posicaoSelecionada == -1) {
+                String nomeMedicamento = medicamentos.get(position).split(" - ")[0];
+                boolean resultado = bancoHelper.marcarComoTomado(nomeMedicamento);
+                if (resultado) {
+                    Toast.makeText(MainActivity.this, "Medicamento marcado como tomado!", Toast.LENGTH_SHORT).show();
+                    carregarMedicamentos();
+                } else {
+                    Toast.makeText(MainActivity.this, "Erro ao marcar medicamento como tomado.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        btnExcluir.setOnClickListener(v -> {
+            if (posicaoSelecionada != -1) {
+                excluirMedicamento();
+            }
+        });
+
+        findViewById(R.id.btnCadastrar).setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, MainActivity2.class);
+            startActivity(intent);
+        });
+    }
+
+    private void carregarMedicamentos() {
+        medicamentos.clear();
+        Cursor cursor = bancoHelper.listarMedicamentos();
+
+        if (cursor.moveToFirst()) {
+            do {
+                String nome = cursor.getString(cursor.getColumnIndex(BancoHelper.COLUNA_NOME));
+                int tomado = cursor.getInt(cursor.getColumnIndex(BancoHelper.COLUNA_TOMADO));
+                String status = (tomado == 1) ? "Tomado" : "Não tomado";
+                medicamentos.add(nome + " - " + status);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private void excluirMedicamento() {
+        if (medicamentoSelecionado != null) {
+            Cursor cursor = bancoHelper.listarMedicamentos();
+            cursor.moveToPosition(posicaoSelecionada);
+            int id = cursor.getInt(cursor.getColumnIndex(BancoHelper.COLUNA_ID));
+            int resultado = bancoHelper.excluirMedicamento(id);
+            cursor.close();
+
+            if (resultado > 0) {
+                Toast.makeText(MainActivity.this, "Medicamento excluído com sucesso!", Toast.LENGTH_SHORT).show();
+                carregarMedicamentos();
+                btnExcluir.setVisibility(View.INVISIBLE);
+                posicaoSelecionada = -1;
+            } else {
+                Toast.makeText(MainActivity.this, "Erro ao excluir medicamento.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+}

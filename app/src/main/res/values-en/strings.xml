@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">Medication Control</string>
+
+    <string name="titulo_lista_medicamentos">Medication List</string>
+    <string name="btn_cadastrar">Register Medication</string>
+    <string name="btn_excluir">Delete Medication</string>
+    <string name="msg_tomado">Medication marked as taken!</string>
+    <string name="msg_nao_tomado">Medication marked as not taken!</string>
+    <string name="msg_erro_status">Error updating medication status.</string>
+    <string name="msg_erro_excluir">Error deleting medication.</string>
+    <string name="msg_sucesso_excluir">Medication deleted successfully!</string>
+
+    <string name="hint_nome_medicamento">Medication Name</string>
+    <string name="hint_descricao_medicamento">Description</string>
+    <string name="hint_horario_medicamento">Time</string>
+    <string name="btn_salvar">Save Medication</string>
+    <string name="btn_voltar">Back</string>
+    <string name="msg_erro_campos">Fill in all fields!</string>
+    <string name="msg_sucesso_salvar">Medication saved successfully!</string>
+    <string name="msg_erro_salvar">Error saving medication.</string>
+</resources>
