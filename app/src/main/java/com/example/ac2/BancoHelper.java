@@ -71,6 +71,6 @@ public class BancoHelper extends SQLiteOpenHelper {
     }
     public Cursor listarHorariosMedicamentos() {
         SQLiteDatabase db = this.getReadableDatabase();
-        return db.rawQuery("SELECT " + COLUNA_ID + ", " + COLUNA_NOME + ", " + COLUNA_HORARIO + " FROM " + TABELA_MEDICAMENTOS + " WHERE " + COLUNA_TOMADO + " = 0", null);
+        return db.rawQuery("SELECT * FROM " + TABELA_MEDICAMENTOS, null);
     }
 }
