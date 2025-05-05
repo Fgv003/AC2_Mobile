@@ -38,10 +38,6 @@ public class MainActivity extends AppCompatActivity {
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, medicamentos);
         listaMedicamentos.setAdapter(adapter);
 
-        carregarMedicamentos();
-        Intent serviceIntent = new Intent(this,BackgroundService.class);
-        startService(serviceIntent);
-
 
         listaMedicamentos.setOnItemLongClickListener((parent, view, position, id) -> {
             medicamentoSelecionado = medicamentos.get(position).split(" - ")[0];
@@ -126,29 +122,27 @@ public class MainActivity extends AppCompatActivity {
                 String horario = cursor.getString(cursor.getColumnIndex(BancoHelper.COLUNA_HORARIO));
 
                 try {
-                    // Converter horário para Calendar
                     String[] partes = horario.split(":");
                     int hora = Integer.parseInt(partes[0]);
                     int minuto = Integer.parseInt(partes[1]);
 
+
                     Calendar calendar = Calendar.getInstance();
                     calendar.set(Calendar.HOUR_OF_DAY, hora);
-                    calendar.set(Calendar.MINUTE, minuto - 5); // 5 min antes
+                    calendar.set(Calendar.MINUTE, minuto - 5);
                     calendar.set(Calendar.SECOND, 0);
 
-                    // Se já passou o horário de hoje, agenda para amanhã
                     if (calendar.before(Calendar.getInstance())) {
                         calendar.add(Calendar.DATE, 1);
                     }
 
-                    // Criar PendingIntent único para cada medicamento (usar ID diferente)
-                    Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-                    intent.putExtra("nomeMedicamento", nome);
+                    Intent serviceIntent = new Intent(this,BackgroundService.class);
+                    startService(serviceIntent);
 
                     PendingIntent pendingIntent = PendingIntent.getBroadcast(
                             MainActivity.this,
-                            nome.hashCode(), // ID único baseado no nome
-                            intent,
+                            nome.hashCode(),
+                            serviceIntent,
                             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
                     );
 
