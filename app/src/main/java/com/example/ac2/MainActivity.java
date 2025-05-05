@@ -1,5 +1,7 @@
 package com.example.ac2;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -36,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
         listaMedicamentos.setAdapter(adapter);
 
         carregarMedicamentos();
+        Intent serviceIntent = new Intent(this,BackgroundService.class);
+        startService(serviceIntent);
+
 
         listaMedicamentos.setOnItemLongClickListener((parent, view, position, id) -> {
             medicamentoSelecionado = medicamentos.get(position).split(" - ")[0];
@@ -71,6 +77,9 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, MainActivity2.class);
             startActivity(intent);
         });
+
+        carregarMedicamentos();
+        agendarNotificacoes();
     }
 
     private void carregarMedicamentos() {
@@ -108,4 +117,51 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void agendarNotificacoes() {
+        Cursor cursor = bancoHelper.listarHorariosMedicamentos();
+        if (cursor.moveToFirst()) {
+            do {
+                String nome = cursor.getString(cursor.getColumnIndex(BancoHelper.COLUNA_NOME));
+                String horario = cursor.getString(cursor.getColumnIndex(BancoHelper.COLUNA_HORARIO));
+
+                try {
+                    // Converter horário para Calendar
+                    String[] partes = horario.split(":");
+                    int hora = Integer.parseInt(partes[0]);
+                    int minuto = Integer.parseInt(partes[1]);
+
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.HOUR_OF_DAY, hora);
+                    calendar.set(Calendar.MINUTE, minuto - 5); // 5 min antes
+                    calendar.set(Calendar.SECOND, 0);
+
+                    // Se já passou o horário de hoje, agenda para amanhã
+                    if (calendar.before(Calendar.getInstance())) {
+                        calendar.add(Calendar.DATE, 1);
+                    }
+
+                    // Criar PendingIntent único para cada medicamento (usar ID diferente)
+                    Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+                    intent.putExtra("nomeMedicamento", nome);
+
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                            MainActivity.this,
+                            nome.hashCode(), // ID único baseado no nome
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                    );
+
+                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+    }
+
 }
